@@ -49,10 +49,13 @@ alias   linkup="${cwd}/linkup.sh"
 alias  pattern="${cwd}/pattern.sh"
 alias    unify="${cwd}/unify.sh"
 
+alias   compile='create'
+alias   run="$exe_file"
+
 alias             c='create'
 alias             e='edit'
 alias             g='gdb '"$exe_file"
-alias             r="$exe_file"
+alias             r='run'
 alias             t="if [ -f \"${trigger_dbg_file}\" ]; then rm -f \"${trigger_dbg_file}\"; else touch \"${trigger_dbg_file}\"; fi; ls \"${dep_dir}\" | grep \"${debug_name}$\""
 
 
@@ -64,7 +67,7 @@ RM()
   do
     if [ -L "$object" ] ||
      { [ -d "$object" ] && [ "$(ls -A "$object")" = "" ]; } ||
-     { [ -f "$object" ] && echo "$object" | grep -q '\(\.[ao]\|\.log\|debug\|\.sha256\)$'; }
+     { [ -f "$object" ] && echo "$object" | grep -q '\(\.[ao]\|\.sha256\)$'; }
     then
         if [ -L "$object" ] # is a LINK
       then

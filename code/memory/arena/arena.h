@@ -1,6 +1,7 @@
 #ifndef ARENA_H
 #define ARENA_H
 
+
     #include "dep/unite.h"
 
 
@@ -44,8 +45,8 @@
 
     // ARENA GROWTH BEHAVIOR
 
-    #define ARENA_SHOULD_GROW      0x44
-    #define ARENA_SHOULD_NOT_GROW  0x00
+    #define ARENA_CAN_GROW     0x44
+    #define ARENA_CANNOT_GROW  0x00
 
 
     // for ease of use

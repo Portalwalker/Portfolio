@@ -12,9 +12,14 @@ source "$(realpath "${BASH_SOURCE%/*}")/globals"
         warn_options="-Wno-return-mismatch"
       memory_options="-fno-tree-dse -fcf-protection=none"
 
-    [ -f "${depdir}/debug" ] && optimize_options="-g -D DEBUG" || optimize_options="-Os -ffunction-sections -fdata-sections -Wl,--gc-sections"
+    if [ -f "${dep_dir}/debug" ]
+    then
+        optimize_options="-g -D DEBUG"
+    else
+        optimize_options="-Os -ffunction-sections -fdata-sections -Wl,--gc-sections"
+    fi
 
-    internal_options="${compiler_options} ${stack_options} ${memory_options} ${depend_options} ${form_options} ${warn_options} ${optimize_options}"
+    internal_options="${align_options} ${compiler_options} ${stack_options} ${memory_options} ${depend_options} ${form_options} ${warn_options} ${optimize_options}"
 
 
      # globals

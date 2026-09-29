@@ -16,7 +16,7 @@
 #define ARENA_GROW(amt)     (AMT_IFTRUE((amt << 1) + amt, !ABOVE_64KB(amt)) + AMT_IFTRUE(amt, ABOVE_64KB(amt)) + AMT_IFTRUE(amt >> 1, ABOVE_4MB(amt)))
 
 
-// TYPE SIZE VERIFICATION 'arena'
+// compiler trick to force 'arena' to be 16 bytes
 SIZECHECKER(arena, STACK_ALIGNMENT);
 
 
@@ -25,9 +25,9 @@ data gridstack; // of arenas
 data gridindexer; // available arena slots
 
 
-// ___ arena_sanitized_mmap
-// ___________ ensures mmap only maps 4096-byte-aligned pages
-// ___________ ensures mmap only maps below ARENA_MAX_MEMREQ (4GB - 4KB)
+// :::: arena_sanitized_mmap
+// ::::::::::::::::::::::::::: ensures mmap only maps 4096-byte-aligned pages
+// ::::::::::::::::::::::::::: ensures mmap only maps below ARENA_MAX_MEMREQ (4GB - 4KB)
 
 u8* arena_sanitized_mmap(unsigned long* amtptr)
 {
@@ -42,8 +42,9 @@ u8* arena_sanitized_mmap(unsigned long* amtptr)
 }
 
 
-// ___ arena_sanitized_munmap
-// ___________ error checks munmap (error format is posix here)
+// :::: arena_sanitized_munmap
+// ::::::::::::::::::::::::::::: error checks munmap (error format is posix here)
+
 unsigned long arena_sanitized_munmap(void* addr, unsigned long length)
 {
     debug_warn(addr == nullptr, "address to unmap == nullptr");
@@ -54,8 +55,8 @@ unsigned long arena_sanitized_munmap(void* addr, unsigned long length)
 }
 
 
-// ___ arena_avail_gridstack_index
-// ___________ finds a valid free gridstack index to map and store arena specs in
+// :::: arena_avail_gridstack_index
+// :::::::::::::::::::::::::::::::::: finds a valid free gridstack index to map and store arena specs in
 
 u64 arena_avail_gridstack_index()
 {
@@ -103,8 +104,8 @@ u64 arena_avail_gridstack_index()
 
 
 
-// ___ arena_grid_start
-// ___________ an initial mapping initiated to hold all future arenas
+// :::: arena_grid_start
+// ::::::::::::::::::::::: an initial mapping initiated to hold all future arenas
 
 u8 arena_grid_start()
 {
@@ -136,8 +137,8 @@ u8 arena_grid_start()
 
 
 
-// ___ arena_grid_end
-// ___________ unmaps all remaining arenas and unmaps the initial mapping of the grid
+// :::: arena_grid_end
+// ::::::::::::::::::::: unmaps all remaining arenas and unmaps the initial mapping of the grid
 
 u8 arena_grid_end()
 {
@@ -171,8 +172,8 @@ u8 arena_grid_end()
 }
 
 
-// ___ arena_start
-// ___________ gets the starting address of an arena
+// :::: arena_start
+// :::::::::::::::::: gets the starting address of an arena
 
 u8* arena_start(u64 block)
 {
@@ -183,9 +184,9 @@ u8* arena_start(u64 block)
 
 
 
-// ___ arena_map
-// ___________ maps an arena and stores its specs into the grid
-// ___________ locks memory into ram if specified
+// :::: arena_map
+// :::::::::::::::: maps an arena and stores its specs into the grid
+// :::::::::::::::: locks memory into ram if specified
 
 u64 arena_mapit(u64 amount, u64 lock_mem_into_ram)
 {
@@ -235,8 +236,8 @@ u64 arena_mapit(u64 amount, u64 lock_mem_into_ram)
 
 
 
-// ___ arena_unmap
-// ___________ unmaps an arena
+// :::: arena_unmap
+// :::::::::::::::::: unmaps an arena
 
 u64 arena_unmapit(u64 block, u64 erase_mem)
 {
@@ -276,10 +277,10 @@ u64 arena_unmapit(u64 block, u64 erase_mem)
 
 
 
-// ___ arena_negotiate
-// ___________ asks OS for RAM with mmap syscall
-// ----------- if memory request through mmap fails
-// ----------- calculates request for until more is secured
+// :::: arena_negotiate
+// :::::::::::::::::::::: asks OS for RAM with mmap syscall
+// :::::::::::::::::::::: if memory request through mmap fails
+// :::::::::::::::::::::: calculates request for until more is secured
 
 void arena_negotiate(arena* new, arena* old)
 {
@@ -309,8 +310,8 @@ void arena_negotiate(arena* new, arena* old)
 
 
 
-// ___ arena_grow
-// ___________ grows an arena and returns a new arena block
+// :::: arena_grow
+// ::::::::::::::::: grows an arena and returns a new arena block
 
 u64 arena_grow(u64 block)
 {
@@ -347,8 +348,8 @@ u64 arena_grow(u64 block)
 
 
 
-// ___ arena_fill
-// ___________ fills an arena with
+// :::: arena_fill
+// ::::::::::::::::: fills an arena with
 
 u64 arena_fill(u64* blockptr, void* ptr, u64 amt, u64 growflag)
 {
@@ -363,7 +364,7 @@ u64 arena_fill(u64* blockptr, void* ptr, u64 amt, u64 growflag)
 
     if (ptr && amt)
     {
-        if ( (amt > arena_avail(block))  &&  (growflag == ARENA_SHOULD_GROW) )
+        if ( (amt > arena_avail(block))  &&  (growflag == ARENA_CAN_GROW) )
         {
             do
             {
@@ -372,7 +373,7 @@ u64 arena_fill(u64* blockptr, void* ptr, u64 amt, u64 growflag)
 
             } while (amt > arena_avail(block));
         }
-        else if (amt > arena_avail(block)) // && growflag == ARENA_SHOULD_NOT_GROW
+        else if (amt > arena_avail(block)) // && growflag == ARENA_CANNOT_GROW
         {
             amt = arena_avail(block);
         }

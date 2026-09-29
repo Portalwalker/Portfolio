@@ -49,9 +49,11 @@ else # CLEAN UP
 
     RM "${top}/${dep_name}"
     RM  ${dep_dir}/*
-    RM "${dep_dir}"
-    RM "${code_dirs}/${dep_name}"
 
+    for dir in $code_dirs
+    do
+        RM "${dir}/${dep_name}"
+    done
 fi
 
 exit 0

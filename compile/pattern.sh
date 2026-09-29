@@ -4,8 +4,7 @@
 source "$(realpath "${BASH_SOURCE%/*}")/globals"
 
 
-pertinent="$(find "$codedir" | grep '/[a-zA-Z0-9\-_]\+\.[hc]$' | grep -v 'other')"
-
+pertinent="$(find "$top_code_dir" | grep '[a-zA-Z0-9\-_]\+\.[hc]$')"
 for pattern in "$@"
 do
     for path in $pertinent
