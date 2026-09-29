@@ -12,7 +12,7 @@ No C Standard Library dependencies.
 
 ### How to get up and running.
 ```bash
-source ./compile/globals
+git clone https://github.com/Portalwalker/CIA.git; source ./compile/globals
 compile && run && clean
 ```
 
@@ -20,3 +20,4 @@ compile && run && clean
 1. Bash
 2. Compiler => gcc, ar
 3. Common => find, grep, realpath, sha256sum, sort, tr, uniq
+4. git
