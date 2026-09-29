@@ -5,8 +5,8 @@ No C Standard Library dependencies.
 
 ## Repository Structure
 
-* **code** — Source Code and Header pairs. One source code and header per directory allowed (e.g., `arena.h` / `arena.c`).
-* **compile** — Contains 7 script files that completely replace the functionality of `make`.
+* **code** — One source code/header pair per new directory allowed.
+* **compile** — Contains 7 script files that replace the functionality of `make`.
 * **compile/dep** — Holds all symbolic links to source code headers, as well as the ultimate static library used to link to the final binary.
 * **dep** — Found inside nearly every source code directory to facilitate the compilation process.
 
