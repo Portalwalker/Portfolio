@@ -18,5 +18,5 @@ compile && run && clean
 
 ### Dependencies
 1. Bash
-2. Compiler: gcc (gnu99), ar
-3. Common Tools: find, grep, realpath, sha256sum, sort, tr, uniq
+2. Compiler => gcc, ar
+3. Common => find, grep, realpath, sha256sum, sort, tr, uniq
