@@ -74,16 +74,6 @@ u64 arena_avail_gridstack_index()
 
     do
     {
-        // NOTE: instead of "ptr = cast(data_getval(&gridstack, index), arena*);"
-        //
-        //       it must be done manually to avoid the forever recursion (only existing because data_getval calls
-        //                                                                                      data_start which calls
-        //                                                                                      arena_start which calls
-        //                                                                                      data_getval)
-
-        // this blows out the stack with recursion
-        // ptr = cast(data_getval(&gridstack, index), arena*);
-
         // this works
         ptr = cast(data_getval(&gridstack, index), arena*);
 
