@@ -1,0 +1,88 @@
+#!/bin/bash
+
+           clear="\033[0m"
+           white="\033[1;37m"
+             red="\033[1;31m"
+          yellow="\033[1;33m"
+           green="\033[1;32m"
+            cyan="\033[1;36m"
+            blue="\033[1;34m"
+          purple="\033[1;35m"
+
+          colecho()
+          {
+              color="$1"
+              shift 1
+              printf "${!color}${@}${clear}\n"
+              return 0
+          }
+
+          texteditor="kate"
+
+             cws="$(realpath "$BASH_SOURCE")"
+             cwd="${cws%/*}"
+             top="${cwd%/*}"
+
+   top_code_name="code"
+      debug_name="debug"
+        dep_name="dep"
+        exe_prfx="main"
+        exe_sufx="run"
+        exe_name="${exe_prfx}.${exe_sufx}"
+
+    top_code_dir="${top}/${top_code_name}"
+         dep_dir="${cwd}/dep"
+
+trigger_dbg_file="${dep_dir}/${debug_name}"
+        exe_file="${top}/${exe_name}"
+        exe_path="${top}"
+      exe_target="${exe_path}/${exe_prfx}"
+
+         staticA="${dep_dir}/one_lib_to_rule_them_all.a"
+
+
+alias  builder="${cwd}/builder.sh"
+alias    clean="${cwd}/clean.sh"
+alias   create="${cwd}/create.sh"
+alias     edit="${cwd}/edit.sh"
+alias   linkup="${cwd}/linkup.sh"
+alias  pattern="${cwd}/pattern.sh"
+alias    unify="${cwd}/unify.sh"
+
+alias             c='create'
+alias             e='edit'
+alias             g='gdb '"$exe_file"
+alias             r="$exe_file"
+alias             t="if [ -f \"${trigger_dbg_file}\" ]; then rm -f \"${trigger_dbg_file}\"; else touch \"${trigger_dbg_file}\"; fi; ls \"${dep_dir}\" | grep \"${debug_name}$\""
+
+
+
+# STRINGENT CONSTRAINTS ON 'rm' TO AVOID PROJECT DELETION
+RM()
+{
+  for object in "$@"
+  do
+    if [ -L "$object" ] ||
+     { [ -d "$object" ] && [ "$(ls -A "$object")" = "" ]; } ||
+     { [ -f "$object" ] && echo "$object" | grep -q '\(\.[ao]\|\.log\|debug\|\.sha256\)$'; }
+    then
+        if [ -L "$object" ] # is a LINK
+      then
+        colecho yellow "[*] removing LINK --> ${object##*Desktop/}"
+        rm -f "$object"
+      elif [ -f "$object" ] # is a FILE
+      then
+        colecho yellow "[*] removing FILE ==> ${object##*/}"
+        rm -f "$object"
+      elif [ -d "$object" ] # is an EMPTY DIRECTORY
+      then
+        colecho yellow "[*] removing  DIR []> ${object##*/}"
+        rmdir "$object"
+      fi
+    fi
+  done
+
+  return 0
+}
+
+# end of source file

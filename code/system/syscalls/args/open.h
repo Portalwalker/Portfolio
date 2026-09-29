@@ -1,0 +1,28 @@
+#ifndef SYSCALL_OPEN_H
+#define SYSCALL_OPEN_H
+
+#define O_LARGEFILE  00100000
+#define O_NOATIME    01000000
+#define O_NOFOLLOW   00400000
+#define O_DSYNC      00010000
+#define O_DIRECT     00040000
+#define O_RDWR       00000002
+#define S_IRUSR      0000400
+#define S_IWUSR      0000200
+#define O_CREAT      00000100
+#define O_WRONLY     00000001
+#define O_TRUNC      00001000
+#define S_ISVTX      0001000
+#define S_IRWXU      0000700
+
+#define OPENAT_ARM_AT_FDCWD -100
+
+#define O_GENFLAGS (O_LARGEFILE | O_NOATIME | O_NOFOLLOW  | O_DSYNC | O_DIRECT)
+
+#define CREATE_FILE_FLAGS (O_GENFLAGS | O_CREAT | O_WRONLY | O_TRUNC)
+#define CREATE_MODE       (S_ISVTX | S_IRWXU)
+
+#define OPEN_FILE_FLAGS (O_GENFLAGS | O_RDWR)
+#define OPEN_MODE       (S_IRUSR | S_IWUSR)
+
+#endif // SYSCALL_OPEN_H

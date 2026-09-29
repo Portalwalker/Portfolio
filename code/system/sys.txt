@@ -1,0 +1,48 @@
+
+/*
+
+[DONE ITEMS]
+
+        [DONE] open
+        [DONE] close
+        [DONE] read
+        [DONE] write
+        [DONE] lseek
+
+        [DONE] mmap/munmap
+
+        [DONE] exit
+
+        [DONE] socket
+        [DONE] socketcall
+
+        [DONE] ioctl
+
+        [DONE] clock_gettime
+
+[TODO ITEMS]
+
+                [TODO] bind
+                [TODO] listen
+                [TODO] accept
+                [TODO] connect
+
+[OTHER TODO ITEMS]
+                    uname / sysinfo
+                    getdents (directory listing)
+                    fork
+                    sys_clone
+
+
+memory, data, lists, contacts, conversations, modules, keys
+
+*/
+
+Isaiah 11:2
+The Spirit of the LORD shall rest upon Him,
+The Spirit of wisdom and understanding,
+The Spirit of counsel and might,
+The Spirit of knowledge and of the fear of the Lord.
+
+
+
