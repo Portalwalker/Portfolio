@@ -17,7 +17,7 @@ compile && run && clean
 ```
 
 ### Dependencies
-1. Bash
-2. Compiler => gcc, ar
-3. Common => find, grep, realpath, sha256sum, sort, tr, uniq
-4. git
+* Bash
+* Compiler => gcc, ar
+* Common => find, grep, realpath, sha256sum, sort, tr, uniq
+* git
