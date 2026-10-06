@@ -27,9 +27,9 @@ fi
 if [ ! "$texteditor_pid" = "" ] && echo "$texteditor" | grep -q "kate"
 then
     texteditor_pid_flags="--pid"
-    echo "$texteditor" $texteditor_pid_flags "$texteditor_pid" $openlist
+    "$texteditor" $texteditor_pid_flags "$texteditor_pid" $openlist
 else
-    echo "$texteditor" $openlist
+    "$texteditor" $openlist
 fi
 
 exit 0
