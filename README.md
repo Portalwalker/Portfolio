@@ -27,7 +27,8 @@ Just call `write(STDOUT, "Hello World!\n", 13);` in your code after `#include "d
 ```bash
 git clone https://github.com/Portalwalker/Portfolio.git
 cd Portfolio; source ./compile/globals
-compile && run && clean
+compile && run
+clean # optional
 ```
 
 ### Dependencies
