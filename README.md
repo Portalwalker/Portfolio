@@ -26,19 +26,19 @@ $~~~~~~~$ `    exit(0);` <br>
 $~~~~~~~$ `}` <br>
 and `compile && run` <br>
 
-
-## Repository Structure
-* code — One same-prefix source code/header pair per directory allowed. Many single headers allowed.
-* compile — Contains 7 script files that replace the functionality of `make`.
-* compile/dep — A directory containing links to all source code headers.
-
-### How to get up and running.
+### Setup and Demo
 ```bash
 git clone https://github.com/Portalwalker/Portfolio.git
 cd Portfolio; source ./compile/globals
 compile && run
 clean # optional
 ```
+
+## Repository Structure
+* Portfolio/. — Top directory. You can compile/run from anywhere after `source .../Portfolio/compile/globals`
+* Portfolio/code — One same-prefix source code/header pair per directory allowed. Many single headers allowed.
+* Portfolio/compile — Contains 7 script files that replace the functionality of `make`.
+* Portfolio/compile/dep — A directory containing links to all source code headers.
 
 ### Dependencies
 * Shell $~~~~~~~~~~~~$ bash \\
