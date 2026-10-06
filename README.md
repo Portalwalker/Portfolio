@@ -3,14 +3,14 @@
 A collection of advanced Pure C programming solutions including:
 * A robust memory allocator
 * Organized Linux System Calls supporting:
-  - `x86_64`$~~~~~~~~~~~~~$(x86 64-bit)
+  - `x86_64`$~~~~~~~~~~~$(x86 64-bit)
   - `i386`$~~~~~~~~~~~~~~~$(x86 32-bit)
-  - `ARM64`$~~~~~~~~~~~~~~$(arm 64-bit)
-  - `ARM EABI`$~~~~~~~~~~~$(arm 32-bit)
-  - `ARM OABI`$~~~~~~~~~~~$(arm 32-bit) **old/rare*
-  - `MIPS N64`$~~~~~~~~~~~$(mips 64-bit)
-  - `MIPS N32`$~~~~~~~~~~~$(mips 32-bit addressing + 64-bit registers)
-  - `MIPS O32`$~~~~~~~~~~~$(mips 32-bit)
+  - `ARM64`$~~~~~~~~~~~~~$(arm 64-bit)
+  - `ARM EABI`$~~~~~~~$(arm 32-bit)
+  - `ARM OABI`$~~~~~~~$(arm 32-bit) **old/rare*
+  - `MIPS N64`$~~~~~~~$(mips 64-bit)
+  - `MIPS N32`$~~~~~~~$(mips 32-bit addrs + 64-bit regs)
+  - `MIPS O32`$~~~~~~~$(mips 32-bit)
 * 68 years more support for the 2038 problem on 32 bit systems.
 * No C Standard Library dependencies.
 
