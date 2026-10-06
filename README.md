@@ -1,4 +1,4 @@
-# C Code Portfolio
+# Portfolio
 
 A collection of advanced Pure C programming solutions including:
 * No C Standard Library dependencies (no libc)
