@@ -2,8 +2,8 @@
 
 A collection of advanced Pure C programming solutions including:
 * No C Standard Library dependencies (no libc)
-* No Dependency Craze; just include `#include "dep/<yourheader>.h"`
-* A robust memory allocator
+* No Makefile dependency mess
+* Robust memory allocation
 * A 68 year fix for the inevitable post-2038 problem on 32-bit systems (A.K.A. Gen-Z's Y2K)
 * Organized Linux System Calls supporting:
 
@@ -32,7 +32,7 @@ Requesting and releasing memory has been over complicated for decades and this h
 
 ### How to get up and running.
 ```bash
-git clone https://github.com/Portalwalker/SilverMemory.git; source ./compile/globals
+git clone https://github.com/Portalwalker/Portfolio.git; source ./compile/globals
 compile && run && clean
 ```
 
