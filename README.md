@@ -1,7 +1,7 @@
 # Portfolio
 
 A collection of advanced Pure C programming solutions including:
-* No C Standard Library dependencies (no libc)
+* No C Standard Library dependencies
 * No Makefile dependency mess
 * Robust memory allocation
 * A 68 year fix for the inevitable post-2038 problem on 32-bit systems (A.K.A. Gen-Z's Y2K)
