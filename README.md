@@ -16,7 +16,7 @@ A collection of advanced Pure C programming solutions including:
   - `MIPS N32`$~~~~~~~$(mips 32-bit addrs + 64-bit regs)
   - `MIPS O32`$~~~~~~~$(mips 32-bit)
 
-Just call `write(STDOUT, "Hello World!\n", 13);` in your code after `#include "dep/toHim.h"`.
+Just call `write(STDOUT, "Hello World!\n", 13);` in your code after `#include "dep/onHim.h"`.
 
 ## Repository Structure
 * code — One same-prefix source code/header pair per directory allowed. Many single headers allowed.
