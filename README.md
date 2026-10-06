@@ -32,10 +32,10 @@ clean # optional
 ```
 
 ### Dependencies
-* Shell => bash
-* Compiler => gcc
-* Library Builder => ar
-* Version Control => git
+* Shell $~~~~~~~~~~~~$ bash \\
+* Compiler $~~~~~~~~~$ gcc \\
+* Library Builder $~~~~$ ar \\
+* Version Control $~~~~$ git \\
 
 #### Personal Notes on Memory Management
 Programmers either rely on a slow memory-garbage-collector or manage their own memory with `malloc`/`free` or `new`/`delete`. These functions have an exhausting level of complexity under the hood (managing and updating lists of pointers to free blocks and used blocks of memory). Yet another surface for bug hunting, perfomance consideration, and 5000+ lines of code included. Programmers need to keep track of every `malloc` and `free` and this takes away mental clarity while building product. This is a grievous dragging factor in program accuracy and simplicity and is barely manageable when trying to expand a large code base (e.g. a weapon system, an embedded system network mesh, or even a startup product). Many low-level programming software projects suffer from this. 
