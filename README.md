@@ -1,6 +1,7 @@
 # Portfolio
+A collection of advanced Pure C programming solutions
 
-A collection of advanced Pure C programming solutions including:
+## Features
 * No C Standard Library dependencies
 * No Makefile dependency mess
 * Robust memory allocation
@@ -16,6 +17,7 @@ A collection of advanced Pure C programming solutions including:
   - `MIPS N32`$~~~~~~~$(mips 32-bit addrs + 64-bit regs)
   - `MIPS O32`$~~~~~~~$(mips 32-bit)
 
+## Simple How-To-Use
 Just `#include "dep/onHim.h"`. in `main.c` <br>
 and `void _start()` <br>
 $~~~~~~~$ `{` <br>
