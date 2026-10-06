@@ -16,7 +16,7 @@ A collection of advanced Pure C programming solutions including:
   - `MIPS N32`$~~~~~~~$(mips 32-bit addrs + 64-bit regs)
   - `MIPS O32`$~~~~~~~$(mips 32-bit)
 
-Just `#include "dep/onHim.h"`. in 'main.c'<br>
+Just `#include "dep/onHim.h"`. in `main.c` <br>
 and `void _start()` <br>
 $~~~~~~~$ `{` <br>
 $~~~~~~~$ `    u32 written = write(STDOUT, "Hello World!\n", 13);` <br>
