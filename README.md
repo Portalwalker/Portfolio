@@ -1,6 +1,7 @@
 # Portfolio
+A collection of advanced Pure C programming solutions
 
-A collection of advanced Pure C programming solutions including:
+## Features
 * No C Standard Library dependencies
 * No Makefile dependency mess
 * Robust memory allocation
@@ -16,25 +17,34 @@ A collection of advanced Pure C programming solutions including:
   - `MIPS N32`$~~~~~~~$(mips 32-bit addrs + 64-bit regs)
   - `MIPS O32`$~~~~~~~$(mips 32-bit)
 
-Just call `write(STDOUT, "Hello World!\n", 13);` in your code after `#include "dep/onHim.h"`.
+## Simple How-To-Use
+Just `#include "dep/onHim.h"`. in `main.c` <br>
+and `void _start()` <br>
+$~~~~~~~$ `{` <br>
+$~~~~~~~$ `    u32 written = write(STDOUT, "Hello World!\n", 13);` <br>
+$~~~~~~~$ `    exit(0);` <br>
+$~~~~~~~$ `}` <br>
+and `compile && run` <br>
 
-## Repository Structure
-* code — One same-prefix source code/header pair per directory allowed. Many single headers allowed.
-* compile — Contains 7 script files that replace the functionality of `make`.
-* compile/dep — A directory containing links to all source code headers.
-
-### How to get up and running.
+### Setup and Demo
 ```bash
 git clone https://github.com/Portalwalker/Portfolio.git
 cd Portfolio; source ./compile/globals
-compile && run && clean
+compile && run
+clean # optional
 ```
 
+## Repository Structure
+* Portfolio/. — Top directory. You can compile/run from anywhere after `source .../Portfolio/compile/globals`
+* Portfolio/code — One same-prefix source code/header pair per directory allowed. Many single headers allowed.
+* Portfolio/compile — Contains 7 script files that replace the functionality of `make`.
+* Portfolio/compile/dep — A directory containing links to all source code headers.
+
 ### Dependencies
-* Shell => bash
-* Compiler => gcc
-* Library Builder => ar
-* Version Control => git
+* Shell $~~~~~~~~~~~~$ bash \\
+* Compiler $~~~~~~~~~$ gcc \\
+* Library Builder $~~~~$ ar \\
+* Version Control $~~~~$ git \\
 
 #### Personal Notes on Memory Management
 Programmers either rely on a slow memory-garbage-collector or manage their own memory with `malloc`/`free` or `new`/`delete`. These functions have an exhausting level of complexity under the hood (managing and updating lists of pointers to free blocks and used blocks of memory). Yet another surface for bug hunting, perfomance consideration, and 5000+ lines of code included. Programmers need to keep track of every `malloc` and `free` and this takes away mental clarity while building product. This is a grievous dragging factor in program accuracy and simplicity and is barely manageable when trying to expand a large code base (e.g. a weapon system, an embedded system network mesh, or even a startup product). Many low-level programming software projects suffer from this. 
