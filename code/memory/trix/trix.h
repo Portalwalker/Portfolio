@@ -19,7 +19,4 @@ void    memrev(void* src, u64 len, u64 skipflags);
 
 #define memzero(dest, len) memset((dest), 0x0000000000000000, (len))
 
-// TODO
-// this library is not compiled with math.a provided in the gcc command (FIX THIS)
-
 #endif // TRIX_H
