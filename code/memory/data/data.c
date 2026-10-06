@@ -2,24 +2,32 @@
 #include "dep/arena.h"
 #include "dep/trix.h"
 
-// compiler trick to force 'data' to be 16 bytes
-SIZECHECKER(data, STACK_ALIGNMENT);
+// TYPE SIZE VERIFICATION 'data'
+SIZECHECKER(data, STACK_ALIGNMENT * 1);
 
 
-// :::: data_max_items
-// ::::::::::::::::: returns the maximum possible values that the data arena can hold
-// ::::::::::::::::: if no arena is in use, the programmer is responsible to handle the data type's max size and max possible items
-
-u64 data_max_items(data* ptr)
+void data_unmap(data* ptr)
 {
-    return (DATA_ABIT(ptr->info)) ? (arena_width(ptr->block) / data_type_width(ptr))
-                                  : 0;
+    if (DATA_ABIT(ptr->info))
+    {
+        arena_unmap(data_arena(ptr));
+    }
+
+    ptr->block = 0;
+    ptr->info  = 0;
 }
 
+// :::: data_width
+// :::::::::::::::::::::
+
+u64 data_width(data* ptr)
+{
+    return (DATA_ABIT(ptr->info)) ? (arena_width(ptr->block)) : data_len(ptr);
+}
 
 // :::: data_start
-// ::::::::::::::::: gets start address of data
-// ::::::::::::::::: usually calls 'arena_start' which looks up the proper arena in use in the global arena grid
+// ::::::::::::::::: usually calls 'arena_start' to get the starting address of the raw data
+// ::::::::::::::::: otherwise.. the block member is assumed to be a direct pointer to memory
 
 u8* data_start(data* ptr)
 {
@@ -62,11 +70,11 @@ void data_add_index(u64 val_or_addr, data* array, u8 vaflag)
     // write value to the new index
     if (vaflag == DATA_IN_ADDRESS)
     {
-        data_write(val_or_addr, array, data_index_after_last(array));
+        data_write(val_or_addr, data_index_after_last(array), array);
     }
     else
     {
-        data_setval(val_or_addr, array, data_index_after_last(array));
+        data_setval(val_or_addr, data_index_after_last(array), array);
     }
 
     // increases length by: 1 * data_type_width(array)
@@ -80,8 +88,8 @@ void data_add_index(u64 val_or_addr, data* array, u8 vaflag)
 
 u64 data_sub_index(data* array)
 {
-    static u64 value;
-    static u64 backindex;
+    u64 value;
+    u64 backindex;
 
     debug_return(array == nullptr, "array == nullptr");
     debug_warn(data_num_items(array) == 0, "data is empty already");
@@ -92,9 +100,9 @@ u64 data_sub_index(data* array)
     }
 
     backindex = data_last_index(array);
-        value = data_getval(array, backindex);
+        value = data_getval(backindex, array, u64);
 
-    data_setval(0, array, backindex);
+    data_setval(0, backindex, array);
 
     // decreases length by: 1 * data_type_width(array)
     data_decrement(array);
@@ -146,10 +154,10 @@ void data_decr_len(u64 numbytes, data* ptr)
 
 
 
-// :::: data_get_index
+// :::: data_get_value_from_index
 // ::::::::::::::::::::: returns a value from the index of the array
 
-u64 data_get_value_from_index(data* array, u64 index)
+u64 data_get_value_from_index(u64 index, data* array)
 {
         debug_return(array == nullptr, "array == nullptr");
         debug_return(index & DATA_MASK_FLAGS, "index overflows flags");
@@ -158,37 +166,55 @@ u64 data_get_value_from_index(data* array, u64 index)
         // NOTE: data_index_offset(array, index) calculates how many bytes forward to move to find the address of the object being indexed
         //       the u8ptr cast ensures good single-byte-addition in place of (void*) which could lead to undefined behavior when adding
 
+        u8* optimize_data_start = data_start(array);
+        u64 optimize_data_index_offset = data_index_offset(array, index);
+
         switch (data_type(array))
         {
                 case T16 :   //     *((u64*)(array->block + index*8))  // DATA_SHALLOW_COPY
 
-                                    return u64c(data_start(array) + data_index_offset(array, index));
+                                    return u64c(optimize_data_start + optimize_data_index_offset);
 
+                case T32 :   //     *((u64*)(array->block + index*8))  // DATA_SHALLOW_COPY
+
+                                    return u64c(optimize_data_start + optimize_data_index_offset);
 
                 case T8  :  //      *((u64*)(array->block + index*8))  // DATA_DEEP_COPY
 
-                                    return dref(u64ptr(data_start(array) + data_index_offset(array, index)));
-
-
-                case T1  :  //      *((u8*)(array->block + index))     // DATA_DEEP_COPY
-
-                                    return dref(data_start(array) + data_index_offset(array, index));
-
-
-                case T2  :  //      *((u16*)(array->block + index*2))  // DATA_DEEP_COPY
-
-                                    return dref(u16ptr(data_start(array) + data_index_offset(array, index)));
-
+                                    return dref(u64ptr(optimize_data_start + optimize_data_index_offset));
 
                 case T4  :  //      *((u32*)(array->block + index*4))  // DATA_DEEP_COPY
 
-                                    return dref(u32ptr(data_start(array) + data_index_offset(array, index)));
+                                    return dref(u32ptr(optimize_data_start + optimize_data_index_offset));
 
+                case T2  :  //      *((u16*)(array->block + index*2))  // DATA_DEEP_COPY
+
+                                    return dref(u16ptr(optimize_data_start + optimize_data_index_offset));
+
+                case T1  :  //      *((u8*)(array->block + index))     // DATA_DEEP_COPY
+
+                                    return dref(optimize_data_start + optimize_data_index_offset);
 
                 default  :  //      array->block + index*data_type_width      // DATA_SHALLOW_COPY
 
-                                    return u64c(data_start(array) + data_index_offset(array, index));
+                                    return u64c(optimize_data_start + optimize_data_index_offset);
         }
+}
+
+
+
+
+// :::: data_get_ptr_to_index
+// ::::::::::::::::::::: returns a pointer to the index of the array
+
+u64 data_get_ptr_to_index(u64 index, data* array)
+{
+    debug_return(array == nullptr, "array == nullptr");
+    debug_return(index & DATA_MASK_FLAGS, "index overflows flags");
+
+    /* debug_warn(index > data_num_items(array), "index out of bounds"); */   // NOTE: too many warnings => allow the index to be out of bounds because
+                                                                              //       not all the data structures function with the assumption of boundaries
+    return u64c(data_start(array) + data_index_offset(array, index));
 }
 
 
@@ -196,17 +222,22 @@ u64 data_get_value_from_index(data* array, u64 index)
 // :::: data_read_index_into
 // ::::::::::::::::::::::::::: reads a value from the index of the array into destination address of a variable
 
-void data_read_index_into(void* dest, data* array, u64 index, u64 deepshallow)
+void data_read_index_into(void* dest, u64 index, data* array, u64 deepshallow)
 {
     debug_return(dest == nullptr, "dest == nullptr");
     debug_return(array == nullptr, "array == nullptr");
     debug_return(index & DATA_MASK_FLAGS, "index overflows flags");
     debug_return(deepshallow != DATA_DEEP_COPY && deepshallow != DATA_SHALLOW_COPY, "deepshallow must be DATA_DEEP_COPY | DATA_SHALLOW_COPY");
-    // debug_warn(index > data_num_items(array), "index out of bounds");
+
+    /* debug_warn(index > data_num_items(array), "index out of bounds"); */   // NOTE: too many warnings => allow the index to be out of bounds because
+                                                                              //       not all the data structures function with the assumption of boundaries
 
     // NOTE: data_index_offset(array, index) calculates how many bytes forward to move to find the address of the object being indexed
     //       the u8ptr cast ensures good single-byte-addition in place of (void*) which could lead to undefined behavior when adding
     // NOTE: dest is assumed to be the variable being initialized/assigned a value
+
+    u8* optimize_data_start = data_start(array);
+    u64 optimize_data_index_offset = data_index_offset(array, index);
 
     switch (data_type(array))
     {
@@ -215,10 +246,24 @@ void data_read_index_into(void* dest, data* array, u64 index, u64 deepshallow)
                     //      void* addr = array->block + index*sizeofitem;                // DATA_SHALLOW_COPY
 
                             if (deepshallow == DATA_DEEP_COPY)   {
-                                                                   dref(u64ptr(dest))     = dref(u64ptr(data_start(array) + data_index_offset(array, index)));
-                                                                   dref(u64ptr(dest) + 1) = dref(u64ptr(data_start(array) + data_index_offset(array, index)) + 1);
+                                                                   dref(u64ptr(dest))     = dref(u64ptr(optimize_data_start + optimize_data_index_offset));
+                                                                   dref(u64ptr(dest) + 1) = dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1);
                                                                  }
-                            else        /* DATA_SHALLOW_COPY */  { dref(u64ptr(dest)) = u64c(data_start(array) + data_index_offset(array, index)); }
+                            else        /* DATA_SHALLOW_COPY */  { dref(u64ptr(dest)) = u64c(optimize_data_start + optimize_data_index_offset); }
+
+
+                    return;
+
+        case T32 :  //      memcpy(addr, array->block + index*sizeofitem, sizeofitem);   // DATA_DEEP_COPY
+                    //      void* addr = array->block + index*sizeofitem;                // DATA_SHALLOW_COPY
+
+                            if (deepshallow == DATA_DEEP_COPY)   {
+                                                                   dref(u64ptr(dest))     = dref(u64ptr(optimize_data_start + optimize_data_index_offset));
+                                                                   dref(u64ptr(dest) + 1) = dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1);
+                                                                   dref(u64ptr(dest) + 2) = dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 2);
+                                                                   dref(u64ptr(dest) + 3) = dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 3);
+                                                                 }
+                            else        /* DATA_SHALLOW_COPY */  { dref(u64ptr(dest)) = u64c(optimize_data_start + optimize_data_index_offset); }
 
 
                     return;
@@ -226,8 +271,8 @@ void data_read_index_into(void* dest, data* array, u64 index, u64 deepshallow)
         case T8  :   //      u64 longval = *((u64*)(array->block + index*8));  // DATA_DEEP_COPY
                      //     u64* longval = array->block + index*8;             // DATA_SHALLOW_COPY
 
-                            if (deepshallow == DATA_DEEP_COPY)   { dref(u64ptr(dest)) = dref(u64ptr(data_start(array) + data_index_offset(array, index))); }
-                            else         /* DATA_SHALLOW_COPY */ { dref(u64ptr(dest)) = u64c(data_start(array) + data_index_offset(array, index));         }
+                            if (deepshallow == DATA_DEEP_COPY)   { dref(u64ptr(dest)) = dref(u64ptr(optimize_data_start + optimize_data_index_offset)); }
+                            else         /* DATA_SHALLOW_COPY */ { dref(u64ptr(dest)) = u64c(optimize_data_start + optimize_data_index_offset);         }
 
 
                     return;
@@ -236,8 +281,8 @@ void data_read_index_into(void* dest, data* array, u64 index, u64 deepshallow)
                     //     u8* byteval = array->block + index;            // DATA_SHALLOW_COPY
 
 
-                            if (deepshallow == DATA_DEEP_COPY)   { dref(u8ptr(dest)) = dref(data_start(array) + data_index_offset(array, index));  }
-                            else         /* DATA_SHALLOW_COPY */ { dref(u64ptr(dest)) = u64c(data_start(array) + data_index_offset(array, index)); }
+                            if (deepshallow == DATA_DEEP_COPY)   { dref(u8ptr(dest))  = dref(optimize_data_start + optimize_data_index_offset);  }
+                            else         /* DATA_SHALLOW_COPY */ { dref(u64ptr(dest)) = u64c(optimize_data_start + optimize_data_index_offset); }
 
 
                     return;
@@ -246,8 +291,8 @@ void data_read_index_into(void* dest, data* array, u64 index, u64 deepshallow)
                     //     u16* shortval = array->block + index*2;             // DATA_SHALLOW_COPY
 
 
-                            if (deepshallow == DATA_DEEP_COPY)    { dref(u16ptr(dest)) = dref(u16ptr(data_start(array) + data_index_offset(array, index))); }
-                            else         /* DATA_SHALLOW_COPY */  { dref(u64ptr(dest)) = u64c(data_start(array) + data_index_offset(array, index));         }
+                            if (deepshallow == DATA_DEEP_COPY)    { dref(u16ptr(dest)) = dref(u16ptr(optimize_data_start + optimize_data_index_offset)); }
+                            else         /* DATA_SHALLOW_COPY */  { dref(u64ptr(dest)) = u64c(optimize_data_start + optimize_data_index_offset);         }
 
 
                     return;
@@ -256,8 +301,8 @@ void data_read_index_into(void* dest, data* array, u64 index, u64 deepshallow)
                     //     u32* intval = array->block + index*4;             // DATA_SHALLOW_COPY
 
 
-                            if (deepshallow == DATA_DEEP_COPY)   { dref(u32ptr(dest)) = dref(u32ptr(data_start(array) + data_index_offset(array, index))); }
-                            else         /* DATA_SHALLOW_COPY */ { dref(u64ptr(dest)) = u64c(data_start(array) + data_index_offset(array, index));         }
+                            if (deepshallow == DATA_DEEP_COPY)   { dref(u32ptr(dest)) = dref(u32ptr(optimize_data_start + optimize_data_index_offset)); }
+                            else         /* DATA_SHALLOW_COPY */ { dref(u64ptr(dest)) = u64c(optimize_data_start + optimize_data_index_offset);         }
 
 
                     return;
@@ -265,8 +310,8 @@ void data_read_index_into(void* dest, data* array, u64 index, u64 deepshallow)
         default  :  //      memcpy(addr, array->block + index*sizeofitem, sizeofitem);   // DATA_DEEP_COPY
                     //      void* addr = array->block + index*sizeofitem;                // DATA_SHALLOW_COPY
 
-                            if (deepshallow == DATA_DEEP_COPY)    { memcpy(dest, data_start(array) + data_index_offset(array, index), data_type_width(array)); }
-                            else         /* DATA_SHALLOW_COPY */  { dref(u64ptr(dest)) = u64c(data_start(array) + data_index_offset(array, index));       }
+                            if (deepshallow == DATA_DEEP_COPY)    { memcpy(dest, optimize_data_start + optimize_data_index_offset, data_type_width(array)); }
+                            else         /* DATA_SHALLOW_COPY */  { dref(u64ptr(dest)) = u64c(optimize_data_start + optimize_data_index_offset);       }
 
 
                     return;
@@ -275,22 +320,27 @@ void data_read_index_into(void* dest, data* array, u64 index, u64 deepshallow)
 
 
 
-// :::: data_write_index_from
-// :::::::::::::::::::::::::::: writes a value from the address of a variable to the index of the array
-// :::::::::::::::::::::::::::: valaddr is interpreted as a value for type T1-T8
-// :::::::::::::::::::::::::::: valaddr is interpreted as a pointer to a struct for types T16 and up
-// :::::::::::::::::::::::::::: e.g. T16 -> 16-byte struct
+// ___ data_write_index_from
+// ___________ writes a value from the address of a variable to the index of the array
+// ----------- valaddr is interpreted as a value for type T1-T8
+// ----------- valaddr is interpreted as a pointer to a struct for types T16 and up
+// ----------- NOTE: T16 -> 16-byte struct
 
-void data_write_index_from(void* valaddr, data* array, u64 index)
+void data_write_index_from(void* valaddr, u64 index, data* array)
 {
     debug_return(array == nullptr, "array == nullptr");
     debug_return(index & DATA_MASK_FLAGS, "index overflows flags");
     debug_warn(valaddr == 0 && data_type(array) >= T16, "valaddr == nullptr...zeroizing the index instead");
-    // debug_warn(index > data_num_items(array), "index out of bounds");
+
+    /* debug_warn(index > data_num_items(array), "index out of bounds"); */   // NOTE: too many warnings => allow the index to be out of bounds because
+                                                                              //       not all the data structures function with the assumption of boundaries
 
     // NOTE: data_index_offset(array, index) calculates how many bytes forward to move to find the address of the object being indexed
     //       the u8ptr cast ensures good single-byte-addition in place of (void*) which could lead to undefined behavior when adding
     // NOTE: valaddr is assumed to be the address of the variable holding the value
+
+    u8* optimize_data_start = data_start(array);
+    u64 optimize_data_index_offset = data_index_offset(array, index);
 
     switch (data_type(array))
     {
@@ -298,44 +348,60 @@ void data_write_index_from(void* valaddr, data* array, u64 index)
         case T16 :   //      memcpy((array->block + index), valaddr, length_of_val);
 
                              if (valaddr) {
-                                            dref(u64ptr(data_start(array) + data_index_offset(array, index)))     = dref(u64ptr(valaddr));
-                                            dref(u64ptr(data_start(array) + data_index_offset(array, index)) + 1) = dref(u64ptr(valaddr) + 1);
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset))     = dref(u64ptr(valaddr));
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1) = dref(u64ptr(valaddr) + 1);
                                           }
                              else         {
-                                            dref(u64ptr(data_start(array) + data_index_offset(array, index)))     = 0;
-                                            dref(u64ptr(data_start(array) + data_index_offset(array, index)) + 1) = 0;
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset))     = 0;
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1) = 0;
+                                          }
+            return;
+
+        case T32 :   //      memcpy((array->block + index), valaddr, length_of_val);
+
+                             if (valaddr) {
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset))     = dref(u64ptr(valaddr));
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1) = dref(u64ptr(valaddr) + 1);
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 2) = dref(u64ptr(valaddr) + 2);
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 3) = dref(u64ptr(valaddr) + 3);
+                                          }
+                             else         {
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset))     = 0;
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1) = 0;
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 2) = 0;
+                                            dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 3) = 0;
                                           }
             return;
 
         case T8 :   //      *((u64*)(array->block + index*4) = (u64)(longval);
 
-                            dref(u64ptr(data_start(array) + data_index_offset(array, index))) = dref(u64ptr(valaddr));
+                            dref(u64ptr(optimize_data_start + optimize_data_index_offset)) = dref(u64ptr(valaddr));
 
             return;
 
         case T1 :   //      *(array->block + index) = (u8)(byteval);
 
-                            dref(data_start(array) + data_index_offset(array, index)) = dref(u8ptr(valaddr));
+                            dref(optimize_data_start + optimize_data_index_offset) = dref(u8ptr(valaddr));
 
             return;
 
         case T2 :   //      *((u16*)(array->block + index*2) = (u16)(shortval);
 
-                            dref(u16ptr(data_start(array) + data_index_offset(array, index))) = dref(u16ptr(valaddr));
+                            dref(u16ptr(optimize_data_start + optimize_data_index_offset)) = dref(u16ptr(valaddr));
 
             return;
 
         case T4 :   //      *((u32*)(array->block + index*4) = (u32)(intval);
 
-                            dref(u32ptr(data_start(array) + data_index_offset(array, index))) = dref(u32ptr(valaddr));
+                            dref(u32ptr(optimize_data_start + optimize_data_index_offset)) = dref(u32ptr(valaddr));
 
             return;
 
         default :   //      memcpy((array->block + index), valaddr, length_of_val;
                     //      for BIGGER blocks of array (e.g. T16,T32,T64...etc), memcpy array to indexed address
 
-                            if (valaddr) { memcpy(data_start(array) + data_index_offset(array, index), voidptr(valaddr), data_type_width(array)); }
-                            else         { memzero(data_start(array) + data_index_offset(array, index), data_type_width(array));         }
+                            if (valaddr) { memcpy(optimize_data_start + optimize_data_index_offset, voidptr(valaddr), data_type_width(array)); }
+                            else         { memzero(optimize_data_start + optimize_data_index_offset, data_type_width(array));         }
 
             return;
     }
@@ -346,17 +412,21 @@ void data_write_index_from(void* valaddr, data* array, u64 index)
 // :::::::::::::::::::::::::::::: writes a value from the value of a variable to the index of the array
 // :::::::::::::::::::::::::::::: val is interpreted as a value for type T1-T8
 // :::::::::::::::::::::::::::::: val is interpreted as a pointer to a struct for types T16 and up
-// :::::::::::::::::::::::::::::: e.g. T16 -> 16-byte struct
+// :::::::::::::::::::::::::::::: NOTE: T16 -> 16-byte struct
 
-void data_set_value_at_index(u64 val, data* array, u64 index)
+void data_set_value_at_index(u64 val, u64 index, data* array)
 {
     debug_return(array == nullptr, "array == nullptr");
     debug_return(index & DATA_MASK_FLAGS, "index overflows flags");
-    // debug_warn(index > data_num_items(array), "index out of bounds");   // too many warnings => allow the index to be out of bounds because not all the data structures function the same
+    /* debug_warn(index > data_num_items(array), "index out of bounds"); */   // NOTE: too many warnings => allow the index to be out of bounds because
+                                                                              //       not all the data structures function with the assumption of boundaries
 
     // NOTE: data_index_offset(array, index) calculates how many bytes forward to move to find the address of the object being indexed
     //       the u8ptr cast ensures good single-byte-addition in place of (void*) which could lead to undefined behavior when adding
     // NOTE: valaddr is assumed to be the address of the variable holding the value
+
+    u8* optimize_data_start = data_start(array);
+    u64 optimize_data_index_offset = data_index_offset(array, index);
 
     switch (data_type(array))
     {
@@ -365,38 +435,57 @@ void data_set_value_at_index(u64 val, data* array, u64 index)
 
                             if (val)
                             {
-                                dref(u64ptr(data_start(array) + data_index_offset(array, index)))     = dref(u64ptr(val));
-                                dref(u64ptr(data_start(array) + data_index_offset(array, index)) + 1) = dref(u64ptr(val) + 1);
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset))     = dref(u64ptr(val));
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1) = dref(u64ptr(val) + 1);
                             }
                             else
                             {
-                                dref(u64ptr(data_start(array) + data_index_offset(array, index)))     = 0;
-                                dref(u64ptr(data_start(array) + data_index_offset(array, index)) + 1) = 0;
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset))     = 0;
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1) = 0;
+                            }
+
+            return;
+
+        case T32 :   //     optimized version of default
+
+                            if (val)
+                            {
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset))     = dref(u64ptr(val));
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1) = dref(u64ptr(val) + 1);
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 2) = dref(u64ptr(val) + 2);
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 3) = dref(u64ptr(val) + 3);
+                            }
+                            else
+                            {
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset))     = 0;
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 1) = 0;
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 2) = 0;
+                                dref(u64ptr(optimize_data_start + optimize_data_index_offset) + 3) = 0;
                             }
 
             return;
 
         case T8 :   //      *((u64*)(array->block + index*4) = (u64)(longval);
 
-                            dref(u64ptr(data_start(array) + data_index_offset(array, index))) = u64c(val);
+                            dref(u64ptr(optimize_data_start + optimize_data_index_offset)) = u64c(val);
 
             return;
 
         case T1 :   //      *(array->block + index) = (u8)(byteval);
 
-                            dref(data_start(array) + data_index_offset(array, index)) = u8c(val);
+                            dref(optimize_data_start + optimize_data_index_offset) = u8c(val);
 
             return;
 
         case T2 :   //      *((u16*)(array->block + index*2) = (u16)(shortval);
 
-                            dref(u16ptr(data_start(array) + data_index_offset(array, index))) = u16c(val);
+                            dref(u16ptr(optimize_data_start + optimize_data_index_offset)) = u16c(val);
 
             return;
 
         case T4 :   //      *((u32*)(array->block + index*4) = (u32)(intval);
 
-                            dref(u32ptr(data_start(array) + data_index_offset(array, index))) = u32c(val);
+                            dref(u32ptr(optimize_data_start + optimize_data_index_offset)) = u32c(val);
 
             return;
 
@@ -405,8 +494,10 @@ void data_set_value_at_index(u64 val, data* array, u64 index)
 
                             debug_warn(val, "this had better be an address");
 
-                            if (val)     { memcpy(data_start(array) + data_index_offset(array, index), voidptr(val), data_type_width(array)); }
-                            else         { memzero(data_start(array) + data_index_offset(array, index), data_type_width(array));              }
+                            u64 width = data_type_width(array);
+
+                            if (val)     { memcpy(optimize_data_start + optimize_data_index_offset, voidptr(val), width); }
+                            else         { memzero(optimize_data_start + optimize_data_index_offset, width);              }
 
             return;
     }

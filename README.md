@@ -32,7 +32,8 @@ Requesting and releasing memory has been over complicated for decades and this h
 
 ### How to get up and running.
 ```bash
-git clone https://github.com/Portalwalker/Portfolio.git; source ./compile/globals
+git clone https://github.com/Portalwalker/Portfolio.git
+cd Portfolio; source ./compile/globals
 compile && run && clean
 ```
 

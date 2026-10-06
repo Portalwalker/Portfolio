@@ -285,6 +285,10 @@
         #endif
     #endif
 
+    #ifndef wchar_t
+        typedef u16 wchar_t;
+    #endif
+
     #define nullptr ((void*)(0))
 
     // casting
@@ -323,11 +327,14 @@
     #define from(var)     addr(var)
     #define of(var)       addr(var)
     #define to(var)       addr(var)
+    #define ptr(var)      addr(var)
 
-    #define MAX8  256
-    #define MAX16 (MAX8  << 8)
-    #define MAX32 (MAX16 << 8)
-    #define MAX64 (MAX32 << 8)
+    #define MAX8  0xff
+    #define MAX16 0xffff
+    #define MAX32 0xffffffff
+    #define MAX64 0xffffffffffffffff
+
+    #define valwidth(val) (1 << (((val) > MAX8) + ((val) > MAX16) + ((val) > MAX32) + ((val) > MAX64)))
 
     #define SIZECHECKER(structure, size) static char p__LINE__[ (sizeof(structure) == (size)) ? 1 : -1]
 

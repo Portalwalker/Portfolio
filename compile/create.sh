@@ -5,7 +5,7 @@ source "$(realpath "${BASH_SOURCE%/*}")/globals"
 
 # prereq scripts to run
 colecho red    "......."
-colecho yellow "......"
+colecho gold   "......"
 colecho green  "....."
 colecho cyan   "...."
 colecho blue   "..."
@@ -17,7 +17,7 @@ ${cwd}/linkup.sh clean >/dev/null 2>&1
 ${cwd}/linkup.sh
 
      result=$?
-[   $result -eq 0 ] && colecho blue "[+] DEPENDENCY WEB CENTRALIZED" || colecho red "[-] DEPENDENCY WEB FAILED"
+[   $result -eq 0 ] && colecho blue "[+] DEPENDENCY WEB CENTRALIZED" || echo "/"'!'"\\DEPENDENCY WEB FAILED"
 [ ! $result -eq 0 ] && exit 1
 
 echo -e "$cyan"
@@ -26,7 +26,7 @@ echo -e "$clear"
 
 # gather static libraries and build main program
 colecho   cyan ""
-colecho   blue "[+] CREATING ${yellow}EXECUTABLE"
+colecho   blue "[+] CREATING ${gold}EXECUTABLE"
 colecho   cyan ""
 colecho   cyan "    BUILDING [${green}${exe_name}]"
 colecho   cyan ""
@@ -38,7 +38,9 @@ colecho clear ""
 colecho blue "[+] statically compiled ${green}[${exe_file##*/}]${blue} is $(ls -l "${exe_file}" | awk '{print $5}') bytes"
 
 colecho green ""
-colecho green "[+] DONE"
-colecho green ""
+colecho blue  "[+] ${green}This project and all its glory is dedicated to \033[1;37mJesus Christ"
+colecho clear ""
+colecho clear "                                                   \033[1;37mGod\033[0m \033[32mamong \033[31mmen\033[1;37m, \033[1;37mSavior\033[0m \033[33mto \033[34mheroes\033[1;37m, \033[1;37mKing\033[0m \033[1;33mover\033[0m ${blue}all\033[1;37m.\033[0m"
+colecho clear ""
 
 exit 0

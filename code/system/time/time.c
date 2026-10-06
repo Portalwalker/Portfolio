@@ -7,7 +7,7 @@
 
 void timeff(timebox64* tbox)
 {
-    static u8 counter = 0;
+    static u8 counter = 0; // init. only once
 
     if (!tbox->tv_nsec)
     {

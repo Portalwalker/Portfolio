@@ -3,7 +3,7 @@
            clear="\033[0m"
            white="\033[1;37m"
              red="\033[1;31m"
-          yellow="\033[1;33m"
+            gold="\033[1;33m"
            green="\033[1;32m"
             cyan="\033[1;36m"
             blue="\033[1;34m"
@@ -17,7 +17,12 @@
               return 0
           }
 
-          texteditor="kate"
+          texteditor=$(which "kate")
+          [ "$texteditor" = "" ] && texteditor=$(which "gedit")
+          [ "$texteditor" = "" ] && texteditor=$(which "subl")
+          [ "$texteditor" = "" ] && texteditor=$(which "eclipse")
+          [ "$texteditor" = "" ] && texteditor=$(which "code")
+          [ "$texteditor" = "" ] && texteditor=$(which "geany")
 
              cws="$(realpath "$BASH_SOURCE")"
              cwd="${cws%/*}"
@@ -26,7 +31,7 @@
    top_code_name="code"
       debug_name="debug"
         dep_name="dep"
-        exe_prfx="main"
+        exe_prfx="play"
         exe_sufx="run"
         exe_name="${exe_prfx}.${exe_sufx}"
 
@@ -38,25 +43,27 @@ trigger_dbg_file="${dep_dir}/${debug_name}"
         exe_path="${top}"
       exe_target="${exe_path}/${exe_prfx}"
 
-         staticA="${dep_dir}/one_lib_to_rule_them_all.a"
+         staticA="${dep_dir}/fellowship.a"
 
 
 alias  builder="${cwd}/builder.sh"
 alias    clean="${cwd}/clean.sh"
 alias   create="${cwd}/create.sh"
-alias     edit="${cwd}/edit.sh"
+alias    cedit="${cwd}/edit.sh"
+alias    fsysc="${cwd}/findsyscall"
 alias   linkup="${cwd}/linkup.sh"
+alias  looksys="${cwd}/lookupsyscall"
 alias  pattern="${cwd}/pattern.sh"
 alias    unify="${cwd}/unify.sh"
 
-alias   compile='create'
-alias   run="$exe_file"
+alias  compile='create'
+alias      run="$exe_file"
 
-alias             c='create'
-alias             e='edit'
+alias             c='compile'
+alias             e='cedit'
 alias             g='gdb '"$exe_file"
 alias             r='run'
-alias             t="if [ -f \"${trigger_dbg_file}\" ]; then rm -f \"${trigger_dbg_file}\"; else touch \"${trigger_dbg_file}\"; fi; ls \"${dep_dir}\" | grep \"${debug_name}$\""
+alias             t="if [ -f \"${trigger_dbg_file}\" ]; then rm -f \"${trigger_dbg_file}\"; ${cwd}/clean.sh; else touch \"${trigger_dbg_file}\"; ${cwd}/clean.sh; fi; ls \"${dep_dir}\" | grep \"${debug_name}$\""
 
 
 
@@ -67,19 +74,19 @@ RM()
   do
     if [ -L "$object" ] ||
      { [ -d "$object" ] && [ "$(ls -A "$object")" = "" ]; } ||
-     { [ -f "$object" ] && echo "$object" | grep -q '\(\.[ao]\|\.sha256\)$'; }
+     { [ -f "$object" ] && echo "$object" | grep -q '\(\.[ao]\|sha256\)$'; }
     then
         if [ -L "$object" ] # is a LINK
       then
-        colecho yellow "[*] removing LINK --> ${object##*Desktop/}"
+        colecho gold "[*] removing LINK --> ${object##*Desktop/}"
         rm -f "$object"
       elif [ -f "$object" ] # is a FILE
       then
-        colecho yellow "[*] removing FILE ==> ${object##*/}"
+        colecho gold "[*] removing FILE ==> ${object##*/}"
         rm -f "$object"
       elif [ -d "$object" ] # is an EMPTY DIRECTORY
       then
-        colecho yellow "[*] removing  DIR []> ${object##*/}"
+        colecho gold "[*] removing  DIR []> ${object##*/}"
         rmdir "$object"
       fi
     fi

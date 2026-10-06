@@ -54,6 +54,7 @@ else # CLEAN UP
     do
         RM "${dir}/${dep_name}"
     done
+
 fi
 
 exit 0

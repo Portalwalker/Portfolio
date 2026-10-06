@@ -170,3 +170,53 @@ void memxor(void* dest, void* src, u64 len)
     }
 }
 
+// ___ memrev
+// __________ reverses memory
+
+void memrev(void* src, u64 len, u64 skipflags)
+{
+    u64 start;
+    u64 end;
+    u64 offset;
+    u8 remstart;
+    u8 remend;
+
+    end = len >> 3;
+    end -= (end != 0);
+    start = 0;
+    offset = len - sizeof(u64);
+
+    remend = u8c(u64c(len) & u64c(0x0f));
+    remend -= (remend != 0);
+    remstart = 0;
+
+    while (start < end)
+    {
+                dref(u64ptr(src) + start) = reverse_8bytes(dref(u64ptr(src) + start), skipflags);
+        dref(u64ptr(u8ptr(src) + offset)) = reverse_8bytes(dref(u64ptr(u8ptr(src) + offset)), skipflags);
+
+               dref(u64ptr(src) + start)  ^= dref(u64ptr(u8ptr(src) + offset));
+        dref(u64ptr(u8ptr(src) + offset)) ^= dref(u64ptr(src) + start);
+               dref(u64ptr(src) + start)  ^= dref(u64ptr(u8ptr(src) + offset));
+
+        ++start;
+        --end;
+        offset -= sizeof(u64);
+    }
+
+    offset = (len >> 4) << 3;
+
+    while (remstart < remend)
+    {
+        dref(u8ptr(src) + remstart + offset) = reverse_byte(dref(u8ptr(src) + remstart + offset), skipflags);
+        dref(u8ptr(src) + remend   + offset) = reverse_byte(dref(u8ptr(src) + remend   + offset), skipflags);
+
+        dref(u8ptr(src) + remstart + offset) ^= dref(u8ptr(src) + remend   + offset);
+        dref(u8ptr(src) + remend   + offset) ^= dref(u8ptr(src) + remstart + offset);
+        dref(u8ptr(src) + remstart + offset) ^= dref(u8ptr(src) + remend   + offset);
+
+        ++remstart;
+        --remend;
+    }
+}
+

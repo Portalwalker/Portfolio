@@ -10,6 +10,7 @@
 #include "dep/bits.h"
 #include "dep/constructions.h"
 #include "dep/principles.h"
+#include "dep/promise.h"
 #include "dep/debug.h"
 
 #include "dep/lseek.h"

@@ -11,10 +11,9 @@ then
     exit 1
 fi
 
-target="$1"
-theLastTarget="$2"
 theLastLastTarget="$3"
-
+theLastTarget="$2"
+target="$1"
 tName="${target##*/}"
 tH=$([ -f "${target}.h" ] && echo "${target}.h")
 tC="${target}.c"
@@ -22,7 +21,7 @@ tPath="${target%/*}"
 
 
             # gather all influencing code into a list
-            target_hdeps=$(cat $tH $tC | grep '#include\s\+"dep/[a-zA-Z0-9\-_]\+\.h"' | grep -o '[a-zA-Z0-9\-_]\+\.h' | grep -v "$tName" | sort | uniq)
+            target_hdeps=$(cat $tH $tC | grep '#include\s\+"dep/[a-zA-Z0-9\-_]\+\.h"' | grep -o '[a-zA-Z0-9\-_]\+\.h' | grep -v "$tName\.h" | sort | uniq)
             target_deps=$(for hdep in $target_hdeps; do echo "${tPath}/${dep_name}/${hdep}"; done)
 
 if [ ! "$tC" = "${exe_target}.c" ]
@@ -30,7 +29,7 @@ then
             # get previous code signature
            oldhash=$([ -f "${tPath}/${tName}.sha256" ] && cat "${tPath}/${tName}.sha256")
            # update previous code signature
-          holdhash=$(sha256sum $target_deps | awk '{print $1}')
+          holdhash=$(sha256sum $tH $tC $target_deps | awk '{print $1}')
             # get current code signature
            curhash=$(echo "$holdhash")
 fi
