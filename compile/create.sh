@@ -38,9 +38,9 @@ colecho clear ""
 colecho blue "[+] statically compiled ${green}[${exe_file##*/}]${blue} is $(ls -l "${exe_file}" | awk '{print $5}') bytes"
 
 colecho green ""
-colecho blue  "[+] ${green}This project and all its glory is dedicated to \033[1;37mJesus Christ"
+colecho blue  "[+] ${green}This project is dedicated to \033[1;37mJesus Christ"
 colecho clear ""
-colecho clear "                                                   \033[1;37mGod\033[0m \033[32mamong \033[31mmen\033[1;37m, \033[1;37mSavior\033[0m \033[33mto \033[34mheroes\033[1;37m, \033[1;37mKing\033[0m \033[1;33mover\033[0m ${blue}all\033[1;37m.\033[0m"
+colecho clear "                                 \033[1;37mGod\033[0m \033[32mamong \033[31mmen\033[1;37m, \033[1;37mSavior\033[0m \033[33mto \033[34mheroes\033[1;37m, \033[1;37mKing\033[0m \033[1;33mover\033[0m ${blue}all\033[1;37m.\033[0m"
 colecho clear ""
 
 exit 0
