@@ -2,6 +2,23 @@
 #include "dep/math.h"
 #include "dep/endian.h"
 
+
+// ___ count_til_nul
+// ___________ counts bytes of memory until a nul-terminator ('\0') is found
+// ___________ mainly useful for initial strings handled main at the beginning of a program
+
+u64 count_til_nul(void* ptr)
+{
+    void* origin = ptr;
+    while (*u8ptr(ptr))
+    {
+        ptr = u8ptr(ptr) + 1;
+    }
+    return absval(u64c(ptr) - u64c(origin));
+}
+
+
+
 // ___ memcpy
 // ___________ self explanatory
 
@@ -81,22 +98,6 @@ void memset(void* dest, u64 c, u64 len)
         dest = u8ptr(dest) + 1;
         --remainder;
     }
-}
-
-
-
-// ___ memtilnul
-// ___________ counts bytes of memory until a nul-terminator ('\0') is found
-// ___________ mainly useful for initial strings handled main at the beginning of a program
-
-u64 memtilnul(void* ptr)
-{
-    void* origin = ptr;
-    while (*u8ptr(ptr))
-    {
-        ptr = u8ptr(ptr) + 1;
-    }
-    return absval(u64c(ptr) - u64c(origin));
 }
 
 

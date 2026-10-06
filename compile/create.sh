@@ -21,7 +21,7 @@ ${cwd}/linkup.sh
 [ ! $result -eq 0 ] && exit 1
 
 echo -e "$cyan"
-ls -l "$dep_dir" | grep -v '\(\.a\|\.log\|debug\)$' | awk 'NR>1 {printf "    %-24s%-4s%s\n", $9, $10, substr($11, 38)}'
+ls -l "$dep_dir" | grep -v '\(\.a\|debug\)$' | awk 'NR>1 {printf "    %-24s%-4s%s\n", $9, $10, substr($11, 38)}'
 echo -e "$clear"
 
 # gather static libraries and build main program

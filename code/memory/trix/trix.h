@@ -4,10 +4,11 @@
 #include "dep/unite.h"
 #include "dep/reverse.h"
 
+ u64 count_til_nul(void* ptr);
+
 void    memcpy(void* dest, void* src, u64 len);
   u8     memeq(void* dest, void* src, u64 len);
 void    memset(void* dest, u64 c, u64 len);
- u64 memtilnul(void* ptr);
 void    memxor(void* dest, void* src, u64 len);
 void    memrev(void* src, u64 len, u64 skipflags);
 
