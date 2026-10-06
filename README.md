@@ -1,9 +1,10 @@
 # C Code Portfolio
 
 A collection of advanced Pure C programming solutions including:
+* No C Standard Library dependencies (no libc)
+* No Dependency Craze. Just include `#include "dep/desiredHeader.h"`. 
 * A robust memory allocator
-* 68 years more support for the 2038 problem on 32 bit systems.
-* No C Standard Library dependencies.
+* A 68 year fix for the inevitable post-2038 problem on 32-bit systems (A.K.A. Gen-Z's Y2K)
 * Organized Linux System Calls supporting:
 
   - `x86_64`$~~~~~~~~~~~$(x86 64-bit)
@@ -15,12 +16,14 @@ A collection of advanced Pure C programming solutions including:
   - `MIPS N32`$~~~~~~~$(mips 32-bit addrs + 64-bit regs)
   - `MIPS O32`$~~~~~~~$(mips 32-bit)
 
-"All you gotta do is call is call `write(STDOUT, "Hello World!\n", 13);` and it works."
+Just call `write(STDOUT, "Hello World!\n", 13);` in your code after `#include "dep/toHim.h"`.
 
 
 ## Repository Structure
 * code — One same-prefix source code/header pair per directory allowed. Many single headers allowed.
 * compile — Contains 7 script files that replace the functionality of `make`.
+* compile/dep — A directory containing links to all source code headers.
+* code/.../src_code_dir/dep — There is also a symbolic link in every source code directory named 'dep' pointing to the actual 'dep' in 'compile'
 
 #### Notes on Memory Management
 Programmers either rely on a slow memory-garbage-collector or manage their own memory with `malloc`/`free` or `new`/`delete`. These functions have an exhausting level of complexity under the hood (managing and updating lists of pointers to free blocks and used blocks of memory). Yet another surface for bug hunting, perfomance consideration, and 5000+ lines of code included. Programmers need to keep track of every `malloc` and `free` and his takes up part of his/her mind while working on a project. This is a grievous dragging factor in program accuracy and is barely manageable when trying to expand a large code base (e.g. a weapon system, an embedded system network mesh, or a startup product). Most low-level programming software projects suffer from this. 
