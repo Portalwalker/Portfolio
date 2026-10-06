@@ -5,6 +5,7 @@ A collection of advanced Pure C programming solutions including:
 * 68 years more support for the 2038 problem on 32 bit systems.
 * No C Standard Library dependencies.
 * Organized Linux System Calls supporting:
+
   - `x86_64`$~~~~~~~~~~~$(x86 64-bit)
   - `i386`$~~~~~~~~~~~~~~~$(x86 32-bit)
   - `ARM64`$~~~~~~~~~~~~~$(arm 64-bit)
